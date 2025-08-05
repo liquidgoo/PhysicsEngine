@@ -1,4 +1,5 @@
 # Features
+Uses [SimpleMath(DirectXMath)](https://github.com/microsoft/DirectXTK/wiki/SimpleMath) for Vector/Matrix operations
 
 ## Discrete collision detection
 ### Geometric primitives:
@@ -15,8 +16,6 @@ Works with complex shapes by combining multiple primitives with one RigidBody
 
 ## Joints
 Suppots constraing point of one body to point of another body or fixed point in space
-
-Uses [SimpleMath(DirectXMath)](https://github.com/microsoft/DirectXTK/wiki/SimpleMath) for Vector/Matrix operations
 
 ## Demo
 ![alt text](https://github.com/liquidgoo/PhysicsEngine/blob/master/demo.gif)
