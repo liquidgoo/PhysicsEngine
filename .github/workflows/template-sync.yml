@@ -34,4 +34,3 @@ jobs:
         with:
           source_repo_path: ${{ env.SOURCE_REPOSITORY }}
           upstream_branch: ${{ env.SOURCE_BRANCH }}
-          pr_labels: <label1>,<label2>[,...] # defaults to template_sync
