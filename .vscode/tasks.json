@@ -1,0 +1,47 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Conan Install",
+            "type": "shell",
+            "command": "./build.sh",
+            "args": [
+                "--conan",
+                "-p",
+                "${input:profile}",
+                "-b",
+                "${input:type}",
+                "-g",
+                "${input:generator}"
+            ],
+            "problemMatcher": []
+        }
+    ],
+    "inputs": [
+        {
+            "id": "profile",
+            "type": "command",
+            "command": "extension.commandvariable.file.pickFile",
+            "args": {
+                "include": "conan_profiles/*"
+            }
+        },
+        {
+            "id": "type",
+            "type": "pickString",
+            "description": "Build type",
+            "default": "Debug",
+            "options": [
+                "Debug",
+                "Release"
+            ]
+        },
+        {
+            "id": "generator",
+            "type": "pickString",
+            "description": "Cmake generator",
+            "default": "Ninja",
+            "options": ["Ninja", "Unix Makefiles"]
+        }
+    ]
+}

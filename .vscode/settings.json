@@ -1,0 +1,10 @@
+{
+  "files.eol": "\n",
+  "clangd.arguments": [
+    "--compile-commands-dir=build/Debug"
+  ],
+  "cmake.debugConfig": {
+    "type": "cppdbg",
+    "MIMode": "gdb"
+  }
+}
