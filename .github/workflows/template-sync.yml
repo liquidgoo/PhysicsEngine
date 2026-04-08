@@ -30,6 +30,7 @@ jobs:
 
       - name: actions-template-sync
         uses: AndreasAugustin/actions-template-sync@v2.5.2
+        if: github.repository != env.SOURCE_REPOSITORY
         with:
           source_repo_path: ${{ env.SOURCE_REPOSITORY }}
           upstream_branch: ${{ env.SOURCE_BRANCH }}
