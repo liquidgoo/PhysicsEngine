@@ -11,9 +11,10 @@ RUN echo "[Docker] Stage: update & install toolchain" && \
     wine64 wine-binfmt \
     cmake ninja-build make \
     git python3 python3-pip \
-    clang-format clang-tidy && \
-    pip install --no-cache-dir --break-system-packages conan \
-    pip install pre-commit
+    clang-format clang-tidy \
+    clangd && \
+    pip install --no-cache-dir --break-system-packages conan pre-commit && \
+    rm -rf /var/lib/apt/lists/*
 
 ENV PATH="${PATH}:/root/.local/bin"
 

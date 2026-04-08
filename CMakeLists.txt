@@ -39,5 +39,5 @@ endif()
 
 # --- Project Structure ---
 # Process the source code and testing directories
-add_subdirectory(src)
+add_subdirectory(physics)
 add_subdirectory(tests)
