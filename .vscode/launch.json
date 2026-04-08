@@ -1,0 +1,31 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "cppdbg",
+            "request": "launch",
+            "name": "MinGW Wine Debug",
+            //"program": "${workspaceFolder}/build/myapp.exe",
+            "miDebuggerPath": "/usr/bin/x86_64-w64-mingw32-gdb",
+            "miDebuggerServerAddress": "localhost:12345",
+            "externalConsole": false,
+            "setupCommands": [
+                {
+                    "text": "set solib-search-path ${workspaceFolder}/bin"
+                }
+            ]
+        },
+        {
+            "name": "(ctest) Launch",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${cmake.testProgram}",
+            "args": [
+                "${cmake.testArgs}"
+            ],
+            "cwd": "${cmake.testWorkingDirectory}",
+            //"MIMode": "gdb",
+            "miDebuggerPath": "/usr/bin/x86_64-w64-mingw32-gdb"
+        }
+    ]
+}
