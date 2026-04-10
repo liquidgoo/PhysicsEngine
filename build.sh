@@ -104,6 +104,17 @@ fi
 echo "[build.sh] Creating build directory 'build'"
 mkdir -p build
 
+if [ ! -f "$CONAN_PROFILE" ]; then
+  echo "[build.sh] ${CONAN_PROFILE} file does not exist"
+  CONAN_PROFILE="conan_profiles/${CONAN_PROFILE}"
+  echo "[build.sh] Trying ${CONAN_PROFILE}"
+  if [ ! -f "$CONAN_PROFILE" ]; then
+    echo "[build.sh] ${CONAN_PROFILE} file does not exist"
+    echo "[build.sh] Aborting"
+    exit
+  fi
+fi
+
 echo "[build.sh] Running Conan install"
 # Conan install configured by profile, build type and CMake generator
 conan install . \
