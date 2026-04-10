@@ -1,12 +1,10 @@
-#include "..\Geometry\Sphere.h";
-#include "..\Geometry\Box.h";
-#include "..\Geometry\Plane.h"
-#include "SimpleMath.h"
-#include "IntersectionTests.h"
+#include "Geometry/Sphere.h"
+#include "Geometry/Box.h"
+#include "Geometry/Plane.h"
+#include "Collision/IntersectionTests.h"
 
 namespace Physics {
 
-    using namespace DirectX::SimpleMath;
     float IntersectionTests::tolerance = 0.0f;
     unsigned IntersectionTests::sphereAndSphere(
         const Sphere& one,
@@ -41,7 +39,7 @@ namespace Physics {
     {
         Vector3 position = sphere.getAxis(3);
         float ballDistance =
-            plane.normal.Dot(position) -
+            dot(plane.normal, position) -
             sphere.radius - plane.offset;
         if (ballDistance >= 0) return 0;
         Contact* contact = new Contact;
@@ -68,7 +66,7 @@ namespace Physics {
         unsigned contactsCount = 0;
         for (int i = 0; i < 8; i++) {
             Vector3& vertexPos = vertices[i];
-            float vertexDistance = vertexPos.Dot(plane.normal);
+            float vertexDistance = dot(vertexPos, plane.normal);
             if (vertexDistance <= plane.offset + tolerance)
             {
                 Contact* contact = new Contact();
@@ -96,7 +94,7 @@ namespace Physics {
     )
     {
         Vector3 center = sphere.getAxis(3);
-        Vector3 relCenter = Vector3::Transform(center, box.getTransform().Invert());
+        Vector3 relCenter = transformPoint(box.getTransform().Inverse(), center);
 
         if (fabsf(relCenter.x) - sphere.radius > box.halfSize.x ||
             fabsf(relCenter.y) - sphere.radius > box.halfSize.y ||
@@ -123,7 +121,7 @@ namespace Physics {
         dist = (closestPt - relCenter).LengthSquared();
         if (dist > sphere.radius * sphere.radius) return 0;
 
-        Vector3 closestPtWorld = Vector3::Transform(closestPt, box.getTransform());
+        Vector3 closestPtWorld = transformPoint(box.getTransform(), closestPt);
 
         Contact* contact = new Contact();
         contact->contactPoint = closestPtWorld;
@@ -144,9 +142,9 @@ namespace Physics {
     )
     {
         return
-            box.halfSize.x * fabsf(axis.Dot(box.getAxis(0))) +
-            box.halfSize.y * fabsf(axis.Dot(box.getAxis(1))) +
-            box.halfSize.z * fabsf(axis.Dot(box.getAxis(2)));
+            box.halfSize.x * fabsf(dot(axis, box.getAxis(0))) +
+            box.halfSize.y * fabsf(dot(axis, box.getAxis(1))) +
+            box.halfSize.z * fabsf(dot(axis, box.getAxis(2)));
     }
 
     static inline float penetrationOnAxis(
@@ -159,7 +157,7 @@ namespace Physics {
         float oneProject = transformToAxis(one, axis);
         float twoProject = transformToAxis(two, axis);
 
-        float distance = fabsf(toCentre.Dot(axis));
+        float distance = fabsf(dot(toCentre, axis));
 
         return oneProject + twoProject - distance;
     }
@@ -200,29 +198,29 @@ namespace Physics {
         Contact* contact = new Contact();
 
         Vector3 normal = one.getAxis(best);
-        if (one.getAxis(best).Dot(toCentre) > 0)
+        if (dot(one.getAxis(best), toCentre) > 0)
         {
             normal = normal * -1.0f;
         }
 
         Vector3 vertex = two.halfSize;
         float proj;
-        proj = two.getAxis(0).Dot(normal);
-        if (proj == 0 && two.getAxis(0).Dot(toCentre) > 0) vertex.x = -vertex.x;
+        proj = dot(two.getAxis(0), normal);
+        if (proj == 0 && dot(two.getAxis(0), toCentre) > 0) vertex.x = -vertex.x;
         else if (proj < 0) vertex.x = -vertex.x;
 
-        proj = two.getAxis(1).Dot(normal);
-        if (proj == 0 && two.getAxis(1).Dot(toCentre) > 0) vertex.y = -vertex.y;
+        proj = dot(two.getAxis(1), normal);
+        if (proj == 0 && dot(two.getAxis(1), toCentre) > 0) vertex.y = -vertex.y;
         else if (proj < 0) vertex.y = -vertex.y;
 
-        proj = two.getAxis(2).Dot(normal);
-        if (proj == 0 && two.getAxis(2).Dot(toCentre) > 0) vertex.z = -vertex.z;
+        proj = dot(two.getAxis(2), normal);
+        if (proj == 0 && dot(two.getAxis(2), toCentre) > 0) vertex.z = -vertex.z;
         else if (proj < 0) vertex.z = -vertex.z;
 
 
         contact->contactNormal = normal;
         contact->penetration = pen;
-        contact->contactPoint = Vector3::Transform(vertex, two.getTransform());
+        contact->contactPoint = transformPoint(two.getTransform(), vertex);
         contact->body1 = one.body;
         contact->body2 = two.body;
         contacts.push_back(contact);
@@ -243,11 +241,11 @@ namespace Physics {
 
         smOne = dOne.LengthSquared();
         smTwo = dTwo.LengthSquared();
-        dpOneTwo = dTwo.Dot(dOne);
+        dpOneTwo = dot(dTwo, dOne);
 
         toSt = pOne - pTwo;
-        dpStaOne = dOne.Dot(toSt);
-        dpStaTwo = dTwo.Dot(toSt);
+        dpStaOne = dot(dOne, toSt);
+        dpStaTwo = dot(dTwo, toSt);
 
         denom = smOne * smTwo - dpOneTwo * dpOneTwo;
 
@@ -294,15 +292,15 @@ namespace Physics {
 
         unsigned bestSingleAxis = best;
 
-        if (!tryAxis(one, two, one.getAxis(0).Cross(two.getAxis(0)), toCentre, 6, pen, best)) return 0;
-        if (!tryAxis(one, two, one.getAxis(0).Cross(two.getAxis(1)), toCentre, 7, pen, best)) return 0;
-        if (!tryAxis(one, two, one.getAxis(0).Cross(two.getAxis(2)), toCentre, 8, pen, best)) return 0;
-        if (!tryAxis(one, two, one.getAxis(1).Cross(two.getAxis(0)), toCentre, 9, pen, best)) return 0;
-        if (!tryAxis(one, two, one.getAxis(1).Cross(two.getAxis(1)), toCentre, 10, pen, best)) return 0;
-        if (!tryAxis(one, two, one.getAxis(1).Cross(two.getAxis(2)), toCentre, 11, pen, best)) return 0;
-        if (!tryAxis(one, two, one.getAxis(2).Cross(two.getAxis(0)), toCentre, 12, pen, best)) return 0;
-        if (!tryAxis(one, two, one.getAxis(2).Cross(two.getAxis(1)), toCentre, 13, pen, best)) return 0;
-        if (!tryAxis(one, two, one.getAxis(2).Cross(two.getAxis(2)), toCentre, 14, pen, best)) return 0;
+        if (!tryAxis(one, two, cross(one.getAxis(0), two.getAxis(0)), toCentre, 6, pen, best)) return 0;
+        if (!tryAxis(one, two, cross(one.getAxis(0), two.getAxis(1)), toCentre, 7, pen, best)) return 0;
+        if (!tryAxis(one, two, cross(one.getAxis(0), two.getAxis(2)), toCentre, 8, pen, best)) return 0;
+        if (!tryAxis(one, two, cross(one.getAxis(1), two.getAxis(0)), toCentre, 9, pen, best)) return 0;
+        if (!tryAxis(one, two, cross(one.getAxis(1), two.getAxis(1)), toCentre, 10, pen, best)) return 0;
+        if (!tryAxis(one, two, cross(one.getAxis(1), two.getAxis(2)), toCentre, 11, pen, best)) return 0;
+        if (!tryAxis(one, two, cross(one.getAxis(2), two.getAxis(0)), toCentre, 12, pen, best)) return 0;
+        if (!tryAxis(one, two, cross(one.getAxis(2), two.getAxis(1)), toCentre, 13, pen, best)) return 0;
+        if (!tryAxis(one, two, cross(one.getAxis(2), two.getAxis(2)), toCentre, 14, pen, best)) return 0;
 
         if (best == (std::numeric_limits<unsigned>::max)()) return 0;
 
@@ -323,16 +321,16 @@ namespace Physics {
             unsigned twoAxisIndex = best % 3;
             Vector3 oneAxis = one.getAxis(oneAxisIndex);
             Vector3 twoAxis = two.getAxis(twoAxisIndex);
-            Vector3 axis = oneAxis.Cross(twoAxis);
+            Vector3 axis = cross(oneAxis, twoAxis);
             axis.Normalize();
 
-            if (axis.Dot(toCentre) > 0) axis = axis * -1.0f;
+            if (dot(axis, toCentre) > 0) axis = axis * -1.0f;
 
             Vector3 ptOnOneEdge = one.halfSize;
             Vector3 ptOnTwoEdge = two.halfSize;
-            if (one.getAxis(0).Dot(axis) > 0) ptOnOneEdge.x = -ptOnOneEdge.x;
-            if (one.getAxis(1).Dot(axis) > 0) ptOnOneEdge.y = -ptOnOneEdge.y;
-            if (one.getAxis(2).Dot(axis) > 0) ptOnOneEdge.z = -ptOnOneEdge.z;
+            if (dot(one.getAxis(0), axis) > 0) ptOnOneEdge.x = -ptOnOneEdge.x;
+            if (dot(one.getAxis(1), axis) > 0) ptOnOneEdge.y = -ptOnOneEdge.y;
+            if (dot(one.getAxis(2), axis) > 0) ptOnOneEdge.z = -ptOnOneEdge.z;
 
             switch (oneAxisIndex)
             {
@@ -346,9 +344,9 @@ namespace Physics {
                 ptOnOneEdge.z = 0;
                 break;
             }
-            if (two.getAxis(0).Dot(axis) < 0) ptOnTwoEdge.x = -ptOnTwoEdge.x;
-            if (two.getAxis(1).Dot(axis) < 0) ptOnTwoEdge.y = -ptOnTwoEdge.y;
-            if (two.getAxis(2).Dot(axis) < 0) ptOnTwoEdge.z = -ptOnTwoEdge.z;
+            if (dot(two.getAxis(0), axis) < 0) ptOnTwoEdge.x = -ptOnTwoEdge.x;
+            if (dot(two.getAxis(1), axis) < 0) ptOnTwoEdge.y = -ptOnTwoEdge.y;
+            if (dot(two.getAxis(2), axis) < 0) ptOnTwoEdge.z = -ptOnTwoEdge.z;
             switch (twoAxisIndex)
             {
             case 0:
@@ -362,8 +360,8 @@ namespace Physics {
                 break;
             }
 
-            ptOnOneEdge = Vector3::Transform(ptOnOneEdge, one.getTransform());
-            ptOnTwoEdge = Vector3::Transform(ptOnTwoEdge, two.getTransform());
+            ptOnOneEdge = transformPoint(one.getTransform(), ptOnOneEdge);
+            ptOnTwoEdge = transformPoint(two.getTransform(), ptOnTwoEdge);
 
             Vector3 vertex = contactPoint(
                 ptOnOneEdge, oneAxis, oneAxisIndex == 0 ? one.halfSize.x : oneAxisIndex == 1 ? one.halfSize.y : one.halfSize.z,

@@ -1,27 +1,26 @@
-#include "Box.h"
-#include "SimpleMath.h"
-#include "Primitive.h"
-#include "..\Collision\IntersectionTests.h"
+#include "Geometry/Box.h"
+#include "Geometry/Primitive.h"
+#include "Collision/IntersectionTests.h"
 
 
 namespace Physics {
 
-    void Box::generateVetices(DirectX::SimpleMath::Vector3 vertices[]) const
+    void Box::generateVetices(Vector3 vertices[]) const
     {
 
-        vertices[0] = DirectX::SimpleMath::Vector3(-halfSize.x, -halfSize.y, -halfSize.z);
-        vertices[1] = DirectX::SimpleMath::Vector3(-halfSize.x, -halfSize.y, +halfSize.z);
-        vertices[2] = DirectX::SimpleMath::Vector3(-halfSize.x, +halfSize.y, -halfSize.z);
-        vertices[3] = DirectX::SimpleMath::Vector3(-halfSize.x, +halfSize.y, +halfSize.z);
-        vertices[4] = DirectX::SimpleMath::Vector3(+halfSize.x, -halfSize.y, -halfSize.z);
-        vertices[5] = DirectX::SimpleMath::Vector3(+halfSize.x, -halfSize.y, +halfSize.z);
-        vertices[6] = DirectX::SimpleMath::Vector3(+halfSize.x, +halfSize.y, -halfSize.z);
-        vertices[7] = DirectX::SimpleMath::Vector3(+halfSize.x, +halfSize.y, +halfSize.z);
+        vertices[0] = Vector3(-halfSize.x, -halfSize.y, -halfSize.z);
+        vertices[1] = Vector3(-halfSize.x, -halfSize.y, +halfSize.z);
+        vertices[2] = Vector3(-halfSize.x, +halfSize.y, -halfSize.z);
+        vertices[3] = Vector3(-halfSize.x, +halfSize.y, +halfSize.z);
+        vertices[4] = Vector3(+halfSize.x, -halfSize.y, -halfSize.z);
+        vertices[5] = Vector3(+halfSize.x, -halfSize.y, +halfSize.z);
+        vertices[6] = Vector3(+halfSize.x, +halfSize.y, -halfSize.z);
+        vertices[7] = Vector3(+halfSize.x, +halfSize.y, +halfSize.z);
 
-        const DirectX::SimpleMath::Matrix& offset = this->transform;
+        const Matrix& offset = this->transform;
 
         for (int i = 0; i < 8; i++) {
-            DirectX::SimpleMath::Vector3::Transform(vertices[i], offset, vertices[i]);
+            vertices[i] = transformPoint(offset, vertices[i]);
         }
     }
 
@@ -45,12 +44,12 @@ namespace Physics {
         other.collideWith(*this, contacts);
     }
 
-    Physics::Box::Box(DirectX::SimpleMath::Vector3 halfSize)
+    Physics::Box::Box(Vector3 halfSize)
     {
         this->halfSize = halfSize;
     }
 
-    Physics::Box::Box(DirectX::SimpleMath::Vector3 halfSize, DirectX::SimpleMath::Matrix transform) : Primitive(transform)
+    Physics::Box::Box(Vector3 halfSize, Matrix transform) : Primitive(transform)
     {
         this->halfSize = halfSize;
     }

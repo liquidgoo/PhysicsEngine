@@ -1,14 +1,11 @@
-#include "Joint.h"
-#include "SimpleMath.h"
-
-using namespace DirectX::SimpleMath;
+#include "Collision/Joint.h"
 unsigned Physics::Joint::addContact(std::vector<Contact*> &contacts)
 {
-    Vector3 jointPositionA = Vector3::Transform(relativeJointPosition[0], body[0]->getTransform());
+    Vector3 jointPositionA = transformPoint(body[0]->getTransform(), relativeJointPosition[0]);
     Vector3 jointPositionB = relativeJointPosition[1];
     if (body[1] != nullptr)
     {
-        jointPositionB = Vector3::Transform(jointPositionB, body[1]->getTransform());
+        jointPositionB = transformPoint(body[1]->getTransform(), jointPositionB);
     }
 
     Vector3 aToB = jointPositionB - jointPositionA;
@@ -35,7 +32,7 @@ unsigned Physics::Joint::addContact(std::vector<Contact*> &contacts)
     return 0;
 }
 
-void Physics::Joint::set(RigidBody* bodyA, RigidBody* bodyB, DirectX::SimpleMath::Vector3 relativeJointPositionA, DirectX::SimpleMath::Vector3 relativeJointPositionB, float maxDisplacement)
+void Physics::Joint::set(RigidBody* bodyA, RigidBody* bodyB, Vector3 relativeJointPositionA, Vector3 relativeJointPositionB, float maxDisplacement)
 {
     body[0] = bodyA;
     body[1] = bodyB;
@@ -44,18 +41,18 @@ void Physics::Joint::set(RigidBody* bodyA, RigidBody* bodyB, DirectX::SimpleMath
     this->maxDisplacement = maxDisplacement;
 }
 
-void Physics::Joint::set(RigidBody* bodyA, RigidBody* bodyB, DirectX::SimpleMath::Vector3 relativeJointPositionA, DirectX::SimpleMath::Vector3 relativeJointPositionB)
+void Physics::Joint::set(RigidBody* bodyA, RigidBody* bodyB, Vector3 relativeJointPositionA, Vector3 relativeJointPositionB)
 {
     set(bodyA, bodyB, relativeJointPositionA, relativeJointPositionB, 0);
 }
 
-void Physics::Joint::set(RigidBody* bodyA, DirectX::SimpleMath::Vector3 relativeJointPositionA, DirectX::SimpleMath::Vector3 relativeJointPositionB, float maxDisplacement)
+void Physics::Joint::set(RigidBody* bodyA, Vector3 relativeJointPositionA, Vector3 relativeJointPositionB, float maxDisplacement)
 {
     set(bodyA, nullptr, relativeJointPositionA, relativeJointPositionB, maxDisplacement);
 }
 
 
-void Physics::Joint::set(RigidBody* bodyA, DirectX::SimpleMath::Vector3 relativeJointPositionA, DirectX::SimpleMath::Vector3 relativeJointPositionB)
+void Physics::Joint::set(RigidBody* bodyA, Vector3 relativeJointPositionA, Vector3 relativeJointPositionB)
 {
     set(bodyA, nullptr, relativeJointPositionA, relativeJointPositionB, 0);
 }

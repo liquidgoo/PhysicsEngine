@@ -1,8 +1,5 @@
-#include "ContactResolver.h"
-#include "SimpleMath.h"
+#include "Collision/ContactResolver.h"
 #include <iostream>
-
-using namespace DirectX::SimpleMath;
 
 
 void Physics::ContactResolver::resolveContacts(std::vector<Contact*>& contacts, float duration)
@@ -48,21 +45,19 @@ void Physics::ContactResolver::adjustVelocities(std::vector<Contact*>& contacts,
                 if (contacts[i]->body1 == contacts[index]->body1)
                 {
                     deltaVel = velocityChange[0] +
-                        rotationChange[0].Cross(contacts[i]->relativeContactPosition1);
+                        cross(rotationChange[0], contacts[i]->relativeContactPosition1);
 
 
-                    Matrix m = contacts[i]->contactToWorld.Transpose();
-                    contacts[i]->contactVelocity += Vector3::Transform(deltaVel, contacts[i]->contactToWorld.Transpose());
+                    contacts[i]->contactVelocity += transformVector(contacts[i]->contactToWorld.Transpose(), deltaVel);
                     contacts[i]->calculateDeltaVelocity(duration);
                 }
                 if (contacts[i]->body1 == contacts[index]->body2)
                 {
                     deltaVel = velocityChange[1] +
-                        rotationChange[1].Cross(
+                        cross(rotationChange[1],
                             contacts[i]->relativeContactPosition1);
 
-                    Matrix m = contacts[i]->contactToWorld.Transpose();
-                    contacts[i]->contactVelocity += Vector3::Transform(deltaVel, contacts[i]->contactToWorld.Transpose());
+                    contacts[i]->contactVelocity += transformVector(contacts[i]->contactToWorld.Transpose(), deltaVel);
                     contacts[i]->calculateDeltaVelocity(duration);
                 }
             }
@@ -71,19 +66,19 @@ void Physics::ContactResolver::adjustVelocities(std::vector<Contact*>& contacts,
                 if (contacts[i]->body2 == contacts[index]->body1)
                 {
                     deltaVel = velocityChange[0] +
-                        rotationChange[0].Cross(
+                        cross(rotationChange[0],
                             contacts[i]->relativeContactPosition2);
 
-                    contacts[i]->contactVelocity += -Vector3::Transform(deltaVel, contacts[i]->contactToWorld.Transpose());
+                    contacts[i]->contactVelocity += -transformVector(contacts[i]->contactToWorld.Transpose(), deltaVel);
                     contacts[i]->calculateDeltaVelocity(duration);
                 }
                 if (contacts[i]->body2 == contacts[index]->body2)
                 {
                     deltaVel = velocityChange[1] +
-                        rotationChange[1].Cross(
+                        cross(rotationChange[1],
                             contacts[i]->relativeContactPosition2);
 
-                    contacts[i]->contactVelocity += -Vector3::Transform(deltaVel, contacts[i]->contactToWorld.Transpose());
+                    contacts[i]->contactVelocity += -transformVector(contacts[i]->contactToWorld.Transpose(), deltaVel);
                     contacts[i]->calculateDeltaVelocity(duration);
                 }
             }
@@ -124,31 +119,31 @@ void Physics::ContactResolver::adjustPositions(std::vector<Contact*>& c)
             {
                 if (c[i]->body1 == c[index]->body1)
                 {
-                    cp = angularChange[0].Cross(c[i]->relativeContactPosition1);
+                    cp = cross(angularChange[0], c[i]->relativeContactPosition1);
                     cp += linearChange[0];
-                    c[i]->penetration -= cp.Dot(c[i]->contactNormal);
+                    c[i]->penetration -= dot(cp, c[i]->contactNormal);
                 }
                 else if (c[i]->body1 == c[index]->body2)
                 {
-                    cp = angularChange[1].Cross(c[i]->relativeContactPosition1);
+                    cp = cross(angularChange[1], c[i]->relativeContactPosition1);
                     cp += linearChange[1];
-                    c[i]->penetration -=  cp.Dot(c[i]->contactNormal);
+                    c[i]->penetration -=  dot(cp, c[i]->contactNormal);
                 }
             }
             if (c[i]->body2 != nullptr)
             {
                 if (c[i]->body2 == c[index]->body1)
                 {
-                    cp = angularChange[0].Cross(c[i]->relativeContactPosition2);
+                    cp = cross(angularChange[0], c[i]->relativeContactPosition2);
                     cp += linearChange[0];
-                    c[i]->penetration += cp.Dot(c[i]->contactNormal);
+                    c[i]->penetration += dot(cp, c[i]->contactNormal);
                 }
             else if (c[i]->body2 == c[index]->body2)
             {
-                cp = angularChange[1].Cross(c[i]->
+                cp = cross(angularChange[1], c[i]->
                     relativeContactPosition2);
                 cp += linearChange[1];
-                c[i]->penetration += cp.Dot(c[i]-> contactNormal);
+                c[i]->penetration += dot(cp, c[i]-> contactNormal);
             }
             }
         }

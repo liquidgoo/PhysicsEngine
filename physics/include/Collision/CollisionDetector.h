@@ -1,8 +1,8 @@
 #pragma once
 
 #include <vector>
-#include "Contact.h"
-#include "..\Geometry\Primitive.h"
+#include "Collision/Contact.h"
+#include "Geometry/Primitive.h"
 
 namespace Physics {
 

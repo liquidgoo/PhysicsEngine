@@ -1,8 +1,8 @@
 #pragma once
-#include "Primitive.h"
-#include "..\Collision\Contact.h"
-#include "Plane.h"
-#include "Box.h"
+#include "Geometry/Primitive.h"
+#include "Collision/Contact.h"
+#include "Geometry/Plane.h"
+#include "Geometry/Box.h"
 namespace Physics {
 
     class Sphere :
@@ -20,7 +20,7 @@ namespace Physics {
 
        
         Sphere(float radius);
-        Sphere(float radius, DirectX::SimpleMath::Matrix transform);
+        Sphere(float radius, Matrix transform);
 
     };
 

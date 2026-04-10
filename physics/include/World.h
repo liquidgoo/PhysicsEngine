@@ -1,11 +1,11 @@
 #pragma once
 #include <vector>
-#include "Geometry\Primitive.h"
+#include "Geometry/Primitive.h"
 #include "RigidBody.h"
-#include "Collision\Contact.h"
-#include "Collision\ContactResolver.h"
-#include "Collision\CollisionDetector.h"
-#include "Collision\Joint.h"
+#include "Collision/Contact.h"
+#include "Collision/ContactResolver.h"
+#include "Collision/CollisionDetector.h"
+#include "Collision/Joint.h"
 namespace Physics {
     class World
     {

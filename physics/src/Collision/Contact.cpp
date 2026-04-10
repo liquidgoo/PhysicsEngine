@@ -1,25 +1,22 @@
-#include "Contact.h"
-#include "SimpleMath.h"
-
-using namespace DirectX::SimpleMath;
+#include "Collision/Contact.h"
 #include <iostream>
 
-DirectX::SimpleMath::Matrix Physics::Contact::getContactToWorld() const
+Matrix Physics::Contact::getContactToWorld() const
 {
     return contactToWorld;
 }
 
-DirectX::SimpleMath::Vector3 Physics::Contact::getRelativeContactPosition1() const
+Vector3 Physics::Contact::getRelativeContactPosition1() const
 {
     return relativeContactPosition1;
 }
 
-DirectX::SimpleMath::Vector3 Physics::Contact::getRelativeContactPosition2() const
+Vector3 Physics::Contact::getRelativeContactPosition2() const
 {
     return relativeContactPosition2;
 }
 
-DirectX::SimpleMath::Vector3 Physics::Contact::getContactVelocity() const
+Vector3 Physics::Contact::getContactVelocity() const
 {
     return contactVelocity;
 }
@@ -31,20 +28,19 @@ float Physics::Contact::getDeltaVelocity() const
 
 void Physics::Contact::calculateContactVelocity()
 {
-    contactVelocity = body1->rotation.Cross(relativeContactPosition1);
+    contactVelocity = cross(body1->rotation, relativeContactPosition1);
     contactVelocity += body1->velocity;
     if (body2 != nullptr) {
-        contactVelocity -= body2->rotation.Cross(relativeContactPosition2); //sign?
+        contactVelocity -= cross(body2->rotation, relativeContactPosition2); //sign?
         contactVelocity -= body2->velocity;
     }
-    Matrix matrix = contactToWorld.Transpose();
-    Vector3::Transform(contactVelocity, matrix, contactVelocity);
+    contactVelocity = transformVector(contactToWorld.Transpose(), contactVelocity);
 }
 void Physics::Contact::calculateDeltaVelocity(float duration)
 {
-    float velocityFromAcceleration = body1->lastFrameAcceleration.Dot(contactNormal) * duration;
+    float velocityFromAcceleration = dot(body1->lastFrameAcceleration, contactNormal) * duration;
     if (body2 != nullptr) {
-        velocityFromAcceleration -= body2->lastFrameAcceleration.Dot(contactNormal) * duration;
+        velocityFromAcceleration -= dot(body2->lastFrameAcceleration, contactNormal) * duration;
     }
     float restitution = (contactVelocity.Length() < velocityLimitForRestitution) ? 0 : this->restitution;
     
@@ -85,7 +81,11 @@ void Physics::Contact::calculateContactBasis()
         contactTangent[1].z = contactNormal.x * contactTangent[0].y;
     }
 
-    contactToWorld = Matrix{ contactNormal, contactTangent[0], contactTangent[1] };
+    contactToWorld = Matrix(
+        mathfu::vec4(contactNormal, 0.0f),
+        mathfu::vec4(contactTangent[0], 0.0f),
+        mathfu::vec4(contactTangent[1], 0.0f),
+        mathfu::vec4(0, 0, 0, 1));
 }
 
 void Physics::Contact::calculateInternals(float duration)
@@ -108,17 +108,16 @@ void Physics::Contact::calculateInternals(float duration)
 
 void setSkewSym(Matrix& matrix, Vector3& vector)
 {
-    matrix._11 = 0;
-    matrix._12 = vector.z;
-    matrix._13 = -vector.y;
-    matrix._14 = 0;
-    matrix._21 = -vector.z;
-    matrix._22 = 0;
-    matrix._23 = vector.x;
-    matrix._31 = vector.y;
-    matrix._32 = -vector.x;
-    matrix._33 = 0;
-    matrix._34 = 0;
+    matrix = Matrix::Identity();
+    matrix(0, 0) = 0.0f;
+    matrix(0, 1) = vector.z;
+    matrix(0, 2) = -vector.y;
+    matrix(1, 0) = -vector.z;
+    matrix(1, 1) = 0.0f;
+    matrix(1, 2) = vector.x;
+    matrix(2, 0) = vector.y;
+    matrix(2, 1) = -vector.x;
+    matrix(2, 2) = 0.0f;
 }
 Vector3 Physics::Contact::frictionImpulse()
 {
@@ -130,7 +129,7 @@ Vector3 Physics::Contact::frictionImpulse()
     deltaVelocityByImpulseWorld *= body1->getInverseInertiaTensorWorld();
     deltaVelocityByImpulseWorld *= impulseToTorque;
     deltaVelocityByImpulseWorld *= -1;
-    deltaVelocityByImpulseWorld._44 = 1;
+    deltaVelocityByImpulseWorld(3, 3) = 1;
 
     if (body2 != nullptr)
     {
@@ -141,22 +140,22 @@ Vector3 Physics::Contact::frictionImpulse()
         deltaVelocityByImpulseWorld2 *= body2->getInverseInertiaTensorWorld();
         deltaVelocityByImpulseWorld2 *= impulseToTorque;
         deltaVelocityByImpulseWorld2 *= -1;
-        deltaVelocityByImpulseWorld2._44 = 1;
+        deltaVelocityByImpulseWorld2(3, 3) = 1;
 
         deltaVelocityByImpulseWorld += deltaVelocityByImpulseWorld2;
     }
 
     Matrix deltaVelocityByImpulse = contactToWorld * deltaVelocityByImpulseWorld * contactToWorld.Transpose();
-    deltaVelocityByImpulse._11 += inverseMass;
-    deltaVelocityByImpulse._22 += inverseMass;
-    deltaVelocityByImpulse._33 += inverseMass;
+    deltaVelocityByImpulse(0, 0) += inverseMass;
+    deltaVelocityByImpulse(1, 1) += inverseMass;
+    deltaVelocityByImpulse(2, 2) += inverseMass;
 
-    Matrix impulseByVelocity = deltaVelocityByImpulse.Invert();
+    Matrix impulseByVelocity = deltaVelocityByImpulse.Inverse();
     //impulseByVelocity._44 = 1;
 
     Vector3 deltaVelocity{ this->deltaVelocity, -contactVelocity.y, -contactVelocity.z };
 
-    Vector3 impulseContact = Vector3::Transform(deltaVelocity, impulseByVelocity);
+    Vector3 impulseContact = transformVector(impulseByVelocity, deltaVelocity);
 
     float planarImpulse = sqrtf(impulseContact.y * impulseContact.y + impulseContact.z * impulseContact.z);
 
@@ -165,9 +164,9 @@ Vector3 Physics::Contact::frictionImpulse()
         impulseContact.y /= planarImpulse;
         impulseContact.z /= planarImpulse;
 
-        impulseContact.x = deltaVelocityByImpulse._11 +
-            deltaVelocityByImpulse._21 * friction * impulseContact.y +
-            deltaVelocityByImpulse._31 * friction * impulseContact.z;
+        impulseContact.x = deltaVelocityByImpulse(0, 0) +
+            deltaVelocityByImpulse(1, 0) * friction * impulseContact.y +
+            deltaVelocityByImpulse(2, 0) * friction * impulseContact.z;
         impulseContact.x = this->deltaVelocity / impulseContact.x;
 
         impulseContact.y *= friction * impulseContact.x;
@@ -178,19 +177,19 @@ Vector3 Physics::Contact::frictionImpulse()
 
 Vector3 Physics::Contact::frictionlessImpulse()
 {
-    Vector3 deltaVelocityByImpulseWorld = relativeContactPosition1.Cross(contactNormal);
-    deltaVelocityByImpulseWorld = Vector3::Transform(deltaVelocityByImpulseWorld, body1->getInverseInertiaTensorWorld());
-    deltaVelocityByImpulseWorld = deltaVelocityByImpulseWorld.Cross(relativeContactPosition1);
+    Vector3 deltaVelocityByImpulseWorld = cross(relativeContactPosition1, contactNormal);
+    deltaVelocityByImpulseWorld = transformVector(body1->getInverseInertiaTensorWorld(), deltaVelocityByImpulseWorld);
+    deltaVelocityByImpulseWorld = cross(deltaVelocityByImpulseWorld, relativeContactPosition1);
     
-    float deltaVelocityByImpulse = deltaVelocityByImpulseWorld.Dot(contactNormal);
+    float deltaVelocityByImpulse = dot(deltaVelocityByImpulseWorld, contactNormal);
     deltaVelocityByImpulse += body1->inverseMass;
     if (body2 != nullptr)
     {
-        deltaVelocityByImpulseWorld = relativeContactPosition2.Cross(contactNormal);
-        deltaVelocityByImpulseWorld = Vector3::Transform(deltaVelocityByImpulseWorld, body2->getInverseInertiaTensorWorld());
-        deltaVelocityByImpulseWorld = deltaVelocityByImpulseWorld.Cross(relativeContactPosition2);
+        deltaVelocityByImpulseWorld = cross(relativeContactPosition2, contactNormal);
+        deltaVelocityByImpulseWorld = transformVector(body2->getInverseInertiaTensorWorld(), deltaVelocityByImpulseWorld);
+        deltaVelocityByImpulseWorld = cross(deltaVelocityByImpulseWorld, relativeContactPosition2);
 
-        deltaVelocityByImpulse += deltaVelocityByImpulseWorld.Dot(contactNormal);
+        deltaVelocityByImpulse += dot(deltaVelocityByImpulseWorld, contactNormal);
         deltaVelocityByImpulse += body2->inverseMass;
     }
 
@@ -203,13 +202,13 @@ void Physics::Contact::applyVelocityChange(Vector3 velocityChange[2], Vector3 ro
 {
     Vector3 impulseContact = frictionImpulse();
     //impulseContact = frictionlessImpulse();
-    Vector3 impulseWorld = Vector3::Transform(impulseContact, contactToWorld);
+    Vector3 impulseWorld = transformVector(contactToWorld, impulseContact);
 
     velocityChange[0] = impulseWorld * body1->inverseMass;
     body1->velocity += velocityChange[0];
 
-    Vector3 torque = relativeContactPosition1.Cross(impulseWorld);
-    rotationChange[0] = Vector3::Transform(torque, body1->getInverseInertiaTensorWorld()); //why minus
+    Vector3 torque = cross(relativeContactPosition1, impulseWorld);
+    rotationChange[0] = transformVector(body1->getInverseInertiaTensorWorld(), torque); //why minus
     body1->rotation += rotationChange[0];
 
     if (body2 != nullptr) {
@@ -217,8 +216,8 @@ void Physics::Contact::applyVelocityChange(Vector3 velocityChange[2], Vector3 ro
         velocityChange[1] = impulseWorld * body1->inverseMass;
         body2->velocity += velocityChange[1];
 
-        Vector3 torque = relativeContactPosition2.Cross(impulseWorld);
-        rotationChange[1] = Vector3::Transform(torque, body2->getInverseInertiaTensorWorld()); // why minus
+        Vector3 torque = cross(relativeContactPosition2, impulseWorld);
+        rotationChange[1] = transformVector(body2->getInverseInertiaTensorWorld(), torque); // why minus
         body2->rotation += rotationChange[1];
     }
 }
@@ -235,12 +234,12 @@ void Physics::Contact::applyPositionChange(Vector3 linearChange[2], Vector3 angu
         if (body != nullptr)
         {
             Vector3 angularInertiaWorld =
-                relativeContactPosition[i].Cross(contactNormal);
-            angularInertiaWorld = Vector3::Transform(angularInertiaWorld, body->getInverseInertiaTensorWorld());
+                cross(relativeContactPosition[i], contactNormal);
+            angularInertiaWorld = transformVector(body->getInverseInertiaTensorWorld(), angularInertiaWorld);
                 
-            angularInertiaWorld = 
-                angularInertiaWorld.Cross(relativeContactPosition[i]);
-            angularInertia[i] = angularInertiaWorld.Dot(contactNormal);
+                angularInertiaWorld = 
+                cross(angularInertiaWorld, relativeContactPosition[i]);
+            angularInertia[i] = dot(angularInertiaWorld, contactNormal);
 
 
             //angularInertia[i] = 0;
@@ -271,7 +270,7 @@ void Physics::Contact::applyPositionChange(Vector3 linearChange[2], Vector3 angu
 
             if (angularMove[i] == 0) { angularChange[i] = {}; }
             else {
-                float limit = angularLimit * (relativeContactPosition[i] - contactNormal * relativeContactPosition[i].Dot(contactNormal)).Length();
+                float limit = angularLimit * (relativeContactPosition[i] - contactNormal * dot(relativeContactPosition[i], contactNormal)).Length();
                 if (fabsf(angularMove[i]) > limit) {
                     float totalMove = linearMove[i] + angularMove[i];
                     if (angularMove[i] >= 0) angularMove[i] = limit;
@@ -279,14 +278,14 @@ void Physics::Contact::applyPositionChange(Vector3 linearChange[2], Vector3 angu
                     linearMove[i] = totalMove - angularMove[i];
                 }
 
-                Vector3 torque = relativeContactPosition[i].Cross(contactNormal);
+                Vector3 torque = cross(relativeContactPosition[i], contactNormal);
                 Vector3 impulsePerMove;
-                Vector3::Transform(torque, body->getInverseInertiaTensorWorld(), impulsePerMove);
+                impulsePerMove = transformVector(body->getInverseInertiaTensorWorld(), torque);
 
                 Vector3 rotationPerMove = impulsePerMove / angularInertia[i];
                 Vector3 rotation = rotationPerMove * angularMove[i];
                 angularChange[i] = rotation;
-                body->orientation *= Quaternion::CreateFromYawPitchRoll(rotation); //order?
+                body->orientation *= Quaternion::FromEulerAngles(rotation); //order?
             }
 
             linearChange[i] = linearMove[i] * contactNormal;

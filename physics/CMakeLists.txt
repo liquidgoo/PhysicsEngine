@@ -7,29 +7,29 @@ set(ENGINE_SOURCES
     src/Collision/ContactResolver.cpp
     src/Collision/IntersectionTests.cpp
     src/Collision/Joint.cpp
-    src/Box.cpp
-    src/Plane.cpp
-    src/Primitive.cpp
-    src/Sphere.cpp
+    src/Geometry/Box.cpp
+    src/Geometry/Plane.cpp
+    src/Geometry/Primitive.cpp
+    src/Geometry/Sphere.cpp
 )
 
 set(ENGINE_HEADERS
-    src/Physics.h
-    src/RigidBody.h
-    src/World.h
-    src/Collision/CollisionDetector.h
-    src/Collision/ContactResolver.h
-    src/Collision/IntersectionTests.h
-    src/Collision/Joint.v
-    src/Box.h
-    src/Plane.h
-    src/Primitive.h
-    src/Sphere.h
+    include/Physics.h
+    include/RigidBody.h
+    include/World.h
+    include/Collision/CollisionDetector.h
+    include/Collision/ContactResolver.h
+    include/Collision/IntersectionTests.h
+    include/Collision/Joint.h
+    include/Geometry/Box.h
+    include/Geometry/Plane.h
+    include/Geometry/Primitive.h
+    include/Geometry/Sphere.h
 )
 
 find_package(mathfu REQUIRED)
 
 add_library(physics_lib STATIC ${ENGINE_SOURCES} ${ENGINE_HEADERS})
-target_include_directories(physics_lib PUBLIC ${ENGINE_HEADERS})
+target_include_directories(physics_lib PUBLIC include)
 
 target_link_libraries(physics_lib PRIVATE mathfu::mathfu)

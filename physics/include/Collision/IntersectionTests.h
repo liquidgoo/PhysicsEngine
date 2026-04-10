@@ -1,7 +1,7 @@
-#include "..\Geometry\Sphere.h"
-#include "Contact.h"
-#include "..\Geometry\Plane.h"
-#include "..\Geometry\Box.h"
+#include "Geometry/Sphere.h"
+#include "Collision/Contact.h"
+#include "Geometry/Plane.h"
+#include "Geometry/Box.h"
 
 namespace Physics {
     namespace IntersectionTests

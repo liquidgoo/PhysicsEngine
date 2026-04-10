@@ -1,7 +1,7 @@
-#include "Plane.h"
-#include "Sphere.h"
-#include "..\Collision\Contact.h"
-#include "..\Collision\IntersectionTests.h"
+#include "Geometry/Plane.h"
+#include "Geometry/Sphere.h"
+#include "Collision/Contact.h"
+#include "Collision/IntersectionTests.h"
 
 
 
@@ -24,12 +24,12 @@ void Physics::Plane::collideWith(Box& other, std::vector<Contact*>& contacts)
     IntersectionTests::boxAndHalfSpace(other, *this, contacts);
 }
 
-Physics::Plane::Plane(DirectX::SimpleMath::Vector3 normal)
+Physics::Plane::Plane(Vector3 normal)
 {
     this->normal = normal;
     this->offset = 0;
 }
-Physics::Plane::Plane(DirectX::SimpleMath::Vector3 normal, float offset ): Plane(normal)
+Physics::Plane::Plane(Vector3 normal, float offset ): Plane(normal)
 {
     this->offset = offset;
 }

@@ -1,8 +1,7 @@
 #pragma once
 
-#include "SimpleMath.h"
-#include "Primitive.h"
-#include "..\Collision\Contact.h"
+#include "Geometry/Primitive.h"
+#include "Collision/Contact.h"
 
 namespace Physics {
 
@@ -13,7 +12,7 @@ namespace Physics {
         public Primitive
     {
     public:
-        DirectX::SimpleMath::Vector3 normal;
+        Vector3 normal;
         float offset;
 
 
@@ -23,8 +22,8 @@ namespace Physics {
         void collideWith(Plane& other, std::vector<Contact*>& contacts);
         void collideWith(Box& other, std::vector<Contact*>& contacts);
 
-        Plane(DirectX::SimpleMath::Vector3 normal, float offset);
-        Plane(DirectX::SimpleMath::Vector3 normal);
+        Plane(Vector3 normal, float offset);
+        Plane(Vector3 normal);
 
     };
 }

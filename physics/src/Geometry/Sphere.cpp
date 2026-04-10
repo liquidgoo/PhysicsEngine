@@ -1,6 +1,6 @@
-#include "Sphere.h"
-#include "..\Collision\Contact.h"
-#include "..\Collision\IntersectionTests.h"
+#include "Geometry/Sphere.h"
+#include "Collision/Contact.h"
+#include "Collision/IntersectionTests.h"
 
 void Physics::Sphere::collideWith(Primitive& other, std::vector<Contact*>& contacts)
 {
@@ -24,7 +24,7 @@ void Physics::Sphere::collideWith(Primitive& other, std::vector<Contact*>& conta
         this->radius = radius;
     }
 
-    Physics::Sphere::Sphere(float radius, DirectX::SimpleMath::Matrix transform): Primitive(transform)
+    Physics::Sphere::Sphere(float radius, Matrix transform): Primitive(transform)
     {
         this->radius = radius;
     }

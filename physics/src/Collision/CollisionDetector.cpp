@@ -1,12 +1,10 @@
 #include <vector>
 #include <limits>
-#include "CollisionDetector.h"
-#include "Contact.h"
-#include "..\Geometry\Primitive.h"
-#include "..\Geometry\Plane.h"
-#include "..\Geometry\Box.h"
-
-using namespace DirectX::SimpleMath;
+#include "Collision/CollisionDetector.h"
+#include "Collision/Contact.h"
+#include "Geometry/Primitive.h"
+#include "Geometry/Plane.h"
+#include "Geometry/Box.h"
 
     void Physics::CollisionDetector::generateContacts(std::vector<Contact*>& contacts, std::vector<Primitive*> &shapes)
     {
