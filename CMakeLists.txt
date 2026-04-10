@@ -32,9 +32,14 @@ endif()
 option(ENABLE_SANITIZERS "Enable Address Sanitizer")
 
 if(ENABLE_SANITIZERS)
+# Sanitizers not supported in gcc based mingw
+    if(NOT (MINGW AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
 # Add instrumentation flags for debugging memory leaks and undefined behavior
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=undefined -fsanitize=address")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=undefined -fsanitize=address")   
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=undefined -fsanitize=address")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=undefined -fsanitize=address")   
+    else()
+        message("Disabling sanitizers: not supported in gcc based mingw")
+    endif()
 endif()
 
 # --- Project Structure ---
