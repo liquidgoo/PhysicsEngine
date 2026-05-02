@@ -35,4 +35,4 @@ jobs:
         with:
           source_repo_path: ${{ env.SOURCE_REPOSITORY }}
           upstream_branch: ${{ env.SOURCE_BRANCH }}
-          target_gh_token: ${{ secrets.PAT }}
+          github_token: ${{ secrets.PAT }}
