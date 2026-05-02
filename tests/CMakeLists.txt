@@ -7,7 +7,7 @@ find_package(GTest REQUIRED)
 add_executable(unit_tests test_sample.cpp)
 
 # Link the code under test and the GTest runner
-target_link_libraries(unit_tests PRIVATE physics_lib GTest::gtest_main)
+target_link_libraries(unit_tests PRIVATE sample_lib GTest::gtest_main)
 
 # --- Test Discovery ---
 # Include the GoogleTest helper module provided by CMake
