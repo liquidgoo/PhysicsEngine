@@ -24,6 +24,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         if: github.repository != env.SOURCE_REPOSITORY
+        with:
+          token: ${{ secrets.PAT }}
         # https://github.com/actions/checkout#usage
         # uncomment if you use submodules within the repository
         # with:
