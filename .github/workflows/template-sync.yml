@@ -17,7 +17,6 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-      actions: write
 
     steps:
       # To use this repository's private action, you must check out the repository
@@ -35,3 +34,4 @@ jobs:
         with:
           source_repo_path: ${{ env.SOURCE_REPOSITORY }}
           upstream_branch: ${{ env.SOURCE_BRANCH }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
