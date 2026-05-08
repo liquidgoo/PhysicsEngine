@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Defaults
-CONAN_PROFILE="conan_profiles/clang"
+CONAN_PROFILE="clang"
 BUILD_TYPE="Debug"
 CMAKE_GENERATOR="Ninja"
 CMAKE_PRESET=""
@@ -101,17 +101,29 @@ if [[ "${CLEAN}" == "ON" ]]; then
   rm -rf build
 fi
 
+is_profile_exists()
+{
+  if [ ! -f "$1" ]; then
+    echo "[build.sh] ${1} file does not exist"
+    return 1
+  fi
+    echo "[build.sh] Using ${1} profile"
+  return 0
+}
+
 echo "[build.sh] Creating build directory 'build'"
 mkdir -p build
 
-if [ ! -f "$CONAN_PROFILE" ]; then
-  echo "[build.sh] ${CONAN_PROFILE} file does not exist"
-  CONAN_PROFILE="conan_profiles/${CONAN_PROFILE}"
-  echo "[build.sh] Trying ${CONAN_PROFILE}"
-  if [ ! -f "$CONAN_PROFILE" ]; then
-    echo "[build.sh] ${CONAN_PROFILE} file does not exist"
-    echo "[build.sh] Aborting"
-    exit
+if ! is_profile_exists $CONAN_PROFILE; then
+  if is_profile_exists "${CONAN_PROFILES}/${CONAN_PROFILE}"; then
+  CONAN_PROFILE="${CONAN_PROFILES}/${CONAN_PROFILE}"
+  else
+    if is_profile_exists "~/.conan2/profiles/${CONAN_PROFILE}"; then
+      CONAN_PROFILE="~/.conan2/profiles/${CONAN_PROFILE}"
+    else
+      echo "[build.sh] Aborting"
+      exit
+    fi
   fi
 fi
 

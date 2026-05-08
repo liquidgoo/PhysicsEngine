@@ -6,5 +6,15 @@
   "cmake.debugConfig": {
     "type": "cppdbg",
     "MIMode": "gdb"
-  }
+  },
+  "vsconan.conan.profile.configurations": {
+        "devcontainer": {
+            "conanVersion": "2",
+            "conanPythonInterpreter": "python3",
+            "conanExecutable": "/usr/local/bin/conan",
+            "conanExecutionMode": "conanExecutable",
+            "conanRecipe": "conanfile.txt"
+        }
+    },
+    "vsconan.conan.profile.default": "devcontainer"
 }
