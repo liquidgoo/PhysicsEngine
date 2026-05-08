@@ -11,6 +11,9 @@
 			"PROJ_DIR": "${containerWorkspaceFolder}"
 		}
 	},
+	"containerEnv": {
+		"GIT_EDITOR": "code --wait"
+	},
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
