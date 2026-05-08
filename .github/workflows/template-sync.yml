@@ -17,12 +17,15 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      actions: write
 
     steps:
       # To use this repository's private action, you must check out the repository
       - name: Checkout
         uses: actions/checkout@v4
         if: github.repository != env.SOURCE_REPOSITORY
+        with:
+          token: ${{ secrets.PAT }}
         # https://github.com/actions/checkout#usage
         # uncomment if you use submodules within the repository
         # with:
@@ -34,3 +37,4 @@ jobs:
         with:
           source_repo_path: ${{ env.SOURCE_REPOSITORY }}
           upstream_branch: ${{ env.SOURCE_BRANCH }}
+          github_token: ${{ secrets.PAT }}
