@@ -42,6 +42,12 @@ if(ENABLE_SANITIZERS)
     endif()
 endif()
 
+# --- Dependencies ---
+find_package(mathfu REQUIRED)
+find_package(glfw3 REQUIRED)
+find_package(glad REQUIRED)
+find_package(OpenGL REQUIRED)
+find_package(GTest REQUIRED)
 # --- Project Structure ---
 # Process the source code and testing directories
 add_subdirectory(physics)
